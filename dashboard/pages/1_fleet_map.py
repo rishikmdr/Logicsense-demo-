@@ -2,23 +2,12 @@ import streamlit as st
 import pandas as pd
 import folium
 from streamlit_folium import st_folium
-from utils.auth import require_login, current_user, get_token, do_logout
 from utils.api import api_get
+from utils import ui
 
 st.set_page_config(page_title="Fleet Map · LogiSense 360", page_icon="🗺️", layout="wide")
-require_login()
-
-with st.sidebar:
-    u = current_user()
-    st.markdown(f"**{u.get('full_name', 'User')}**")
-    st.caption(u.get("role", "").replace("_", " ").title())
-    if st.button("Logout"):
-        do_logout()
-        st.switch_page("app.py")
-
-st.title("🗺️ Live Fleet Map")
-
-token = get_token()
+token = ui.boot("pages/1_fleet_map.py", "Live Fleet Map",
+                "Real-time vehicle positions and fleet status")
 vehicles = api_get("/fleet/vehicles", token=token) or []
 summary = api_get("/fleet/summary", token=token) or {}
 active_trips = api_get("/trips/active", token=token) or []

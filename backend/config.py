@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     jwt_refresh_expire_days: int = 7
 
     anthropic_api_key: str = ""
+    openai_api_key: str = ""
+    agent_model_anthropic: str = "claude-3-5-sonnet-20241022"
+    agent_model_openai: str = "gpt-4o"
     demo_mode: bool = True
 
     @property

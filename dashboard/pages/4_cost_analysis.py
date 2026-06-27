@@ -2,21 +2,13 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from utils.auth import require_login, current_user, get_token, has_permission, do_logout
+from utils.auth import get_token, has_permission
 from utils.api import api_get
+from utils import ui
 
 st.set_page_config(page_title="Cost Analysis · LogiSense 360", page_icon="💰", layout="wide")
-require_login()
-
-with st.sidebar:
-    u = current_user()
-    st.markdown(f"**{u.get('full_name', 'User')}**")
-    st.caption(u.get("role", "").replace("_", " ").title())
-    if st.button("Logout"):
-        do_logout()
-        st.switch_page("app.py")
-
-st.title("💰 Cost Analysis")
+token = ui.boot("pages/4_cost_analysis.py", "Cost Analysis",
+                "Revenue, cost structure and trip-level profitability")
 
 if not has_permission("finance:read"):
     st.error("Access denied. Finance Manager or Admin role required.")
@@ -31,8 +23,8 @@ if trends:
     df = pd.DataFrame(trends)
     fig = go.Figure()
     fig.add_trace(go.Bar(x=df["week"], y=df["revenue_inr"], name="Revenue ₹", marker_color="#22c55e"))
-    fig.update_layout(title="Weekly Revenue Trend", template="plotly_dark", height=350)
-    st.plotly_chart(fig, use_container_width=True)
+    fig.update_layout(title="Weekly Revenue Trend", template=ui.plotly_template(), height=350)
+    ui.show_chart(fig)
 
 if cost_breakdown:
     labels = ["Fuel", "Driver", "Toll", "Maintenance"]
@@ -45,11 +37,11 @@ if cost_breakdown:
     fig2 = px.pie(
         values=values, names=labels,
         title="Cost Breakdown (All Time)",
-        template="plotly_dark",
+        template=ui.plotly_template(),
         color_discrete_sequence=["#FF6B35", "#3b82f6", "#f59e0b", "#22c55e"],
         hole=0.4,
     )
-    st.plotly_chart(fig2, use_container_width=True)
+    ui.show_chart(fig2)
 
 if trips:
     df_t = pd.DataFrame(trips)

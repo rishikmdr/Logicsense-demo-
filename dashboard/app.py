@@ -1,6 +1,7 @@
 import streamlit as st
 from utils.auth import do_login, is_logged_in, do_logout
 from utils.api import backend_is_healthy
+from utils import ui
 
 st.set_page_config(
     page_title="LogiSense 360",
@@ -8,6 +9,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
+
+ui.init_state()
+ui.inject_css()
 
 # Redirect logged-in users
 if is_logged_in():

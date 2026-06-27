@@ -1,25 +1,15 @@
 import streamlit as st
-from utils.auth import require_login, current_user, get_token, has_permission, do_logout
+from utils.auth import has_permission
 from utils.api import api_get, api_post
+from utils import ui
 
-st.set_page_config(page_title="AI Insights · LogiSense 360", page_icon="🤖", layout="wide")
-require_login()
-
-with st.sidebar:
-    u = current_user()
-    st.markdown(f"**{u.get('full_name', 'User')}**")
-    st.caption(u.get("role", "").replace("_", " ").title())
-    if st.button("Logout"):
-        do_logout()
-        st.switch_page("app.py")
-
-st.title("🤖 AI Insights")
+st.set_page_config(page_title="AI Insights · LogiSense 360", page_icon="🧠", layout="wide")
+token = ui.boot("pages/6_ai_insights.py", "AI Insights",
+                "Daily briefs, anomaly detection and shift handovers")
 
 if not has_permission("ai:read"):
     st.error("Access denied. Admin or Manager role required.")
     st.stop()
-
-token = get_token()
 tab1, tab2, tab3, tab4 = st.tabs(["Daily Brief", "Ask AI", "Anomaly Detection", "Handover Report"])
 
 with tab1:

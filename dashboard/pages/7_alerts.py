@@ -1,21 +1,12 @@
 import streamlit as st
 import pandas as pd
-from utils.auth import require_login, current_user, get_token, has_permission, do_logout
+from utils.auth import has_permission
 from utils.api import api_get, api_patch
+from utils import ui
 
-st.set_page_config(page_title="Alerts · LogiSense 360", page_icon="🚨", layout="wide")
-require_login()
-
-with st.sidebar:
-    u = current_user()
-    st.markdown(f"**{u.get('full_name', 'User')}**")
-    st.caption(u.get("role", "").replace("_", " ").title())
-    if st.button("Logout"):
-        do_logout()
-        st.switch_page("app.py")
-
-st.title("🚨 Alerts")
-token = get_token()
+st.set_page_config(page_title="Alerts · LogiSense 360", page_icon="🔔", layout="wide")
+token = ui.boot("pages/7_alerts.py", "Alerts",
+                "Active incidents, severity triage and resolution")
 
 summary = api_get("/alerts/summary", token=token) or {}
 c1, c2, c3, c4 = st.columns(4)

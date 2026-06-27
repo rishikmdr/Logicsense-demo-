@@ -2,22 +2,12 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
-from utils.auth import require_login, current_user, get_token, do_logout
 from utils.api import api_get
+from utils import ui
 
-st.set_page_config(page_title="Operations · LogiSense 360", page_icon="⚙️", layout="wide")
-require_login()
-
-with st.sidebar:
-    u = current_user()
-    st.markdown(f"**{u.get('full_name', 'User')}**")
-    st.caption(u.get("role", "").replace("_", " ").title())
-    if st.button("Logout"):
-        do_logout()
-        st.switch_page("app.py")
-
-st.title("⚙️ Operations Dashboard")
-token = get_token()
+st.set_page_config(page_title="Operations · LogiSense 360", page_icon="📡", layout="wide")
+token = ui.boot("pages/2_operations.py", "Operations Control",
+                "Live operational KPIs, delivery status and alerts")
 
 kpis = api_get("/analytics/kpis/summary", token=token) or {}
 trends = api_get("/analytics/kpis/trends", token=token) or []
@@ -38,10 +28,10 @@ if trends:
         title="Weekly Trips & Cost/km",
         yaxis=dict(title="Trips"),
         yaxis2=dict(title="₹/km", overlaying="y", side="right"),
-        template="plotly_dark",
+        template=ui.plotly_template(),
         height=350,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    ui.show_chart(fig)
 
 col1, col2 = st.columns(2)
 with col1:
@@ -58,9 +48,9 @@ with col1:
             color=labels,
             color_discrete_map={"Critical": "#ef4444", "High": "#f97316", "Medium": "#f59e0b", "Low": "#22c55e"},
             title="Active Alerts by Severity",
-            template="plotly_dark",
+            template=ui.plotly_template(),
         )
-        st.plotly_chart(fig2, use_container_width=True)
+        ui.show_chart(fig2)
 
 with col2:
     trips = api_get("/trips", params={"limit": 200}, token=token) or []
@@ -68,5 +58,5 @@ with col2:
         df_t = pd.DataFrame(trips)
         status_counts = df_t["status"].value_counts().reset_index()
         status_counts.columns = ["Status", "Count"]
-        fig3 = px.pie(status_counts, names="Status", values="Count", title="Trip Status Distribution", template="plotly_dark", hole=0.4)
-        st.plotly_chart(fig3, use_container_width=True)
+        fig3 = px.pie(status_counts, names="Status", values="Count", title="Trip Status Distribution", template=ui.plotly_template(), hole=0.4)
+        ui.show_chart(fig3)

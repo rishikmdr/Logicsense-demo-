@@ -2,22 +2,12 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import date, timedelta
-from utils.auth import require_login, current_user, get_token, do_logout
 from utils.api import api_get
+from utils import ui
 
-st.set_page_config(page_title="Compliance · LogiSense 360", page_icon="📋", layout="wide")
-require_login()
-
-with st.sidebar:
-    u = current_user()
-    st.markdown(f"**{u.get('full_name', 'User')}**")
-    st.caption(u.get("role", "").replace("_", " ").title())
-    if st.button("Logout"):
-        do_logout()
-        st.switch_page("app.py")
-
-st.title("📋 Compliance & Documents")
-token = get_token()
+st.set_page_config(page_title="Compliance · LogiSense 360", page_icon="🛡️", layout="wide")
+token = ui.boot("pages/5_compliance.py", "Compliance & Documents",
+                "Vehicle document expiry tracking and audit readiness")
 vehicles = api_get("/fleet/vehicles", token=token) or []
 
 if not vehicles:
@@ -79,6 +69,6 @@ fig = px.bar(
     x="Document", y="Count", color="Status",
     color_discrete_map={"EXPIRED": "#ef4444", "CRITICAL": "#f97316", "WARNING": "#f59e0b", "OK": "#22c55e"},
     title="Document Status by Type",
-    template="plotly_dark",
+    template=ui.plotly_template(),
 )
-st.plotly_chart(fig, use_container_width=True)
+ui.show_chart(fig)
