@@ -71,7 +71,7 @@ for trip in active_trips:
 
 col_map, col_table = st.columns([2, 1])
 with col_map:
-    st_folium(m, width=None, height=500, use_container_width=True)
+    st_folium(m, height=500, returned_objects=[])
 
 with col_table:
     st.markdown("**Vehicle List**")
